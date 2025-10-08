@@ -1,0 +1,73 @@
+<?php
+
+namespace SslConverter\Generators;
+
+use SslConverter\Exceptions\ConversionException;
+use SslConverter\ValueObjects\CertificateData;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
+
+class JksGenerator
+{
+    private CertificateData $certificateData;
+    private string $password;
+    private string $alias;
+    private bool $useLegacyAlgorithm;
+
+    public function __construct(
+        CertificateData $certificateData,
+        string $password,
+        string $alias = 'certificate',
+        bool $useLegacyAlgorithm = false
+    ) {
+        $this->certificateData = $certificateData;
+        $this->password = $password;
+        $this->alias = $alias;
+        $this->useLegacyAlgorithm = $useLegacyAlgorithm;
+    }
+
+    public function generate(): string
+    {
+        $tempPfx = tempnam(sys_get_temp_dir(), 'pfx_');
+        $tempJks = tempnam(sys_get_temp_dir(), 'jks_');
+
+        unlink($tempJks);
+
+        try {
+            $pfxGenerator = new PfxGenerator(
+                $this->certificateData,
+                $this->password,
+                $this->useLegacyAlgorithm
+            );
+            $pfxData = $pfxGenerator->generate();
+            file_put_contents($tempPfx, $pfxData);
+
+            $process = new Process([
+                'keytool',
+                '-importkeystore',
+                '-srckeystore', $tempPfx,
+                '-srcstoretype', 'pkcs12',
+                '-srcalias', '1',
+                '-srcstorepass', $this->password,
+                '-destkeystore', $tempJks,
+                '-deststoretype', 'jks',
+                '-deststorepass', $this->password,
+                '-destalias', $this->alias,
+                '-noprompt'
+            ]);
+
+            $process->mustRun();
+
+            return file_get_contents($tempJks);
+        } catch (ProcessFailedException $e) {
+            throw new ConversionException("Failed to generate JKS file: " . $e->getMessage());
+        } finally {
+            if (file_exists($tempPfx)) {
+                unlink($tempPfx);
+            }
+            if (file_exists($tempJks)) {
+                unlink($tempJks);
+            }
+        }
+    }
+}
