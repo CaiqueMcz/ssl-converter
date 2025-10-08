@@ -4,9 +4,8 @@ namespace SslConverter\Generators;
 
 use SslConverter\Exceptions\ConversionException;
 use SslConverter\Utils\PrivateKeyUtil;
+use SslConverter\Utils\ProcessUtil;
 use SslConverter\ValueObjects\CertificateData;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class PfxGenerator
 {
@@ -21,7 +20,7 @@ class PfxGenerator
         $this->useLegacyAlgorithm = $useLegacyAlgorithm;
     }
 
-    public function generate(): string
+    public function generate()
     {
         $pfxData = $this->generateStandard();
 
@@ -32,7 +31,7 @@ class PfxGenerator
         return $pfxData;
     }
 
-    private function generateStandard(): string
+    private function generateStandard()
     {
         $certificate = $this->certificateData->getCertificate();
         $privateKeyUtil = new PrivateKeyUtil(
@@ -60,8 +59,8 @@ class PfxGenerator
             $keyResource,
             $this->password,
             [
-                'extracerts' => $caCerts,
-            //     'friendly_name' => 'Certificate'
+                'extracerts' => $caCerts
+
             ]
         );
 
@@ -72,7 +71,7 @@ class PfxGenerator
         return $pfxData;
     }
 
-    private function convertToLegacy(string $pfxData): string
+    private function convertToLegacy($pfxData)
     {
         $tempPfx = tempnam(sys_get_temp_dir(), 'pfx_');
         $tempPem = tempnam(sys_get_temp_dir(), 'pem_');
@@ -81,7 +80,7 @@ class PfxGenerator
         try {
             file_put_contents($tempPfx, $pfxData);
 
-            $extractProcess = new Process([
+            $extractProcess = new ProcessUtil([
                 'openssl', 'pkcs12',
                 '-in', $tempPfx,
                 '-out', $tempPem,
@@ -90,7 +89,7 @@ class PfxGenerator
             ]);
             $extractProcess->mustRun();
 
-            $convertProcess = new Process([
+            $convertProcess = new ProcessUtil([
                 'openssl', 'pkcs12',
                 '-export',
                 '-in', $tempPem,
@@ -104,7 +103,7 @@ class PfxGenerator
             $legacyData = file_get_contents($tempLegacy);
 
             return $legacyData;
-        } catch (ProcessFailedException $e) {
+        } catch (ConversionException $e) {
             throw new ConversionException("Failed to convert PFX to legacy format: " . $e->getMessage());
         } finally {
             if (file_exists($tempPfx)) {

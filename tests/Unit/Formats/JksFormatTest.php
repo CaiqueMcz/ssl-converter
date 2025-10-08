@@ -8,13 +8,13 @@ use SslConverter\Formats\JksFormat;
 use SslConverter\Tests\Fixtures\CertificateFixtures;
 use SslConverter\ValueObjects\CertificateData;
 use SslConverter\ValueObjects\PrivateKeyData;
-use Symfony\Component\Process\Process;
+use SslConverter\Utils\ProcessUtil;
 
 class JksFormatTest extends TestCase
 {
     private function isKeytoolAvailable()
     {
-        $process = new Process(['keytool', '-help']);
+        $process = new ProcessUtil(['keytool', '-help']);
         $process->run();
         return $process->isSuccessful();
     }

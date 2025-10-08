@@ -3,18 +3,17 @@
 namespace SslConverter\Tests\Unit\Generators;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Exceptions\ConversionException;
 use SslConverter\Generators\JksGenerator;
 use SslConverter\Tests\Fixtures\CertificateFixtures;
+use SslConverter\Utils\ProcessUtil;
 use SslConverter\ValueObjects\CertificateData;
 use SslConverter\ValueObjects\PrivateKeyData;
-use Symfony\Component\Process\Process;
 
 class JksGeneratorTest extends TestCase
 {
     private function isKeytoolAvailable()
     {
-        $process = new Process(['keytool', '-help']);
+        $process = new ProcessUtil(['keytool', '-help']);
         $process->run();
         return $process->isSuccessful();
     }

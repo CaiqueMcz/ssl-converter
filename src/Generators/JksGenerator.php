@@ -3,9 +3,8 @@
 namespace SslConverter\Generators;
 
 use SslConverter\Exceptions\ConversionException;
+use SslConverter\Utils\ProcessUtil;
 use SslConverter\ValueObjects\CertificateData;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class JksGenerator
 {
@@ -26,7 +25,7 @@ class JksGenerator
         $this->useLegacyAlgorithm = $useLegacyAlgorithm;
     }
 
-    public function generate(): string
+    public function generate()
     {
         $tempPfx = tempnam(sys_get_temp_dir(), 'pfx_');
         $tempJks = tempnam(sys_get_temp_dir(), 'jks_');
@@ -42,7 +41,7 @@ class JksGenerator
             $pfxData = $pfxGenerator->generate();
             file_put_contents($tempPfx, $pfxData);
 
-            $process = new Process([
+            $process = new ProcessUtil([
                 'keytool',
                 '-importkeystore',
                 '-srckeystore', $tempPfx,
@@ -59,7 +58,7 @@ class JksGenerator
             $process->mustRun();
 
             return file_get_contents($tempJks);
-        } catch (ProcessFailedException $e) {
+        } catch (ConversionException $e) {
             throw new ConversionException("Failed to generate JKS file: " . $e->getMessage());
         } finally {
             if (file_exists($tempPfx)) {
