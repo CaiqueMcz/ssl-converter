@@ -15,12 +15,11 @@ class Converter implements ConverterInterface
 {
     public function convert(
         CertificateFormatInterface $to
-    ): ConversionResponseInterface
-    {
+    ): ConversionResponseInterface {
         return $to->convert();
     }
 
-    public static function convertToPem(string  $certificate, ?string $ca, ?string $privateKey, ?string $privateKeyPassword): ConversionResponseInterface
+    public static function convertToPem(string $certificate, ?string $ca, ?string $privateKey, ?string $privateKeyPassword): ConversionResponseInterface
     {
         $privateKeyData = new PrivateKeyData($privateKey, $privateKeyPassword);
         $certificateData = new CertificateData($certificate, $privateKeyData, $ca);

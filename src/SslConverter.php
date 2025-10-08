@@ -58,9 +58,8 @@ class SslConverter
     public function toJks(
         string $password,
         string $alias = 'certificate',
-        bool   $useLegacyAlgorithm = false
-    ): ConversionResponseInterface
-    {
+        bool $useLegacyAlgorithm = false
+    ): ConversionResponseInterface {
         $certificateData = $this->buildCertificateData();
 
         $format = new JksFormat($certificateData);
