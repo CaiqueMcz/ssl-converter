@@ -1,10 +1,10 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Utils;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Exceptions\ConversionException;
-use SslConverter\Utils\ProcessUtil;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Utils\ProcessUtil;
 
 class ProcessUtilTest extends TestCase
 {
