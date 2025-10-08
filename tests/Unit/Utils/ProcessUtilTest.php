@@ -1,10 +1,10 @@
 <?php
 
-namespace CaiqueMcz\SslConverter\Tests\Unit\Utils;
+namespace SslConverter\Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use CaiqueMcz\SslConverter\Exceptions\ConversionException;
-use CaiqueMcz\SslConverter\Utils\ProcessUtil;
+use SslConverter\Exceptions\ConversionException;
+use SslConverter\Utils\ProcessUtil;
 
 class ProcessUtilTest extends TestCase
 {
@@ -29,7 +29,7 @@ class ProcessUtilTest extends TestCase
 
     public function testRunReturnsFailureForInvalidCommand()
     {
-        $process = new ProcessUtil(['invalid-command-xyz']);
+        $process = new ProcessUtil(['sh', '-c', 'exit 1']);
         $process->run();
 
         $this->assertFalse($process->isSuccessful());
