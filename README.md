@@ -1,7 +1,9 @@
 # SSL Converter
 
-A PHP library for converting SSL certificates between different formats (PEM, PFX/PKCS12, JKS), including CA bundles and
-private keys.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D7.4-blue.svg)](https://php.net)
+
+A PHP library for converting SSL certificates between different formats (PEM, PFX/PKCS12, JKS), including CA bundles and private keys.
 
 ## Features
 
@@ -29,13 +31,109 @@ composer require caiquemcz/ssl-converter
 
 ## Usage
 
+### Quick Start with Fluent API (Recommended)
+
+The simplest way to convert certificates is using the fluent `SslConverter` API:
+
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+// Convert to PEM
+$response = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)
+    ->withPrivateKey($privateKey, $password)  // password is optional
+    ->toPem();
+
+// Convert to PFX
+$response = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)              // optional
+    ->withPrivateKey($privateKey, $password)  // password is optional
+    ->toPfx('pfx-password', $useLegacy);   // useLegacy is optional (default: false)
+
+// Convert to JKS
+$response = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)              // optional
+    ->withPrivateKey($privateKey, $password)  // password is optional
+    ->toJks('jks-password', 'alias', $useLegacy);  // alias and useLegacy are optional
+
+// Save the converted file
+file_put_contents(
+    $response->virtualFile()->getName(),
+    $response->virtualFile()->getContent()
+);
+```
+
+### Real-World Examples
+
+**Example 1: Convert PEM to PFX for Windows servers**
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+$certificate = file_get_contents('certificate.pem');
+$privateKey = file_get_contents('private.key');
+$caBundle = file_get_contents('ca-bundle.pem');
+
+$response = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)
+    ->withPrivateKey($privateKey)
+    ->toPfx('SecurePassword123!');
+
+file_put_contents('certificate.pfx', $response->virtualFile()->getContent());
+```
+
+**Example 2: Convert to JKS for Java applications**
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+$certificate = file_get_contents('certificate.crt');
+$privateKey = file_get_contents('private.key');
+
+$response = (new SslConverter($certificate))
+    ->withPrivateKey($privateKey)
+    ->toJks('keystore-password', 'myapp');
+
+file_put_contents('keystore.jks', $response->virtualFile()->getContent());
+```
+
+**Example 3: Handle encrypted private keys**
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+$certificate = file_get_contents('certificate.pem');
+$encryptedKey = file_get_contents('encrypted-private.key');
+
+$response = (new SslConverter($certificate))
+    ->withPrivateKey($encryptedKey, 'key-encryption-password')
+    ->toPfx('pfx-password');
+
+file_put_contents('certificate.pfx', $response->virtualFile()->getContent());
+```
+
+**Example 4: Use legacy algorithm for older systems**
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+$certificate = file_get_contents('certificate.pem');
+$privateKey = file_get_contents('private.key');
+
+$response = (new SslConverter($certificate))
+    ->withPrivateKey($privateKey)
+    ->toPfx('password', true);  // true = use legacy algorithm
+
+file_put_contents('certificate.pfx', $response->virtualFile()->getContent());
+```
+
+### Advanced Usage with Converters
+
+For more control, use the converter classes directly:
+
 ### Converting to PEM Format
 
 ```php
-use SslConverter\Converter;
-use SslConverter\Formats\PemFormat;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\Converter;
+use CaiqueMcz\SslConverter\Formats\PemFormat;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 $certificateData = new CertificateData(
     $certificate,
@@ -63,7 +161,7 @@ foreach ($response->extraVirtualFile() as $file) {
 ### Converting to PFX Format
 
 ```php
-use SslConverter\Formats\PfxFormat;
+use CaiqueMcz\SslConverter\Formats\PfxFormat;
 
 $certificateData = new CertificateData(
     $certificate,
@@ -87,7 +185,7 @@ file_put_contents('certificate.pfx', $pfxFile->getContent());
 ### Converting to JKS Format
 
 ```php
-use SslConverter\Formats\JksFormat;
+use CaiqueMcz\SslConverter\Formats\JksFormat;
 
 $certificateData = new CertificateData(
     $certificate,
@@ -111,7 +209,7 @@ file_put_contents('certificate.jks', $jksFile->getContent());
 ### Working with Encrypted Private Keys
 
 ```php
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 // Private key with password
 $privateKeyData = new PrivateKeyData($privateKey, 'key-password');
@@ -149,14 +247,12 @@ foreach ($allFiles->get() as $file) {
 ## Format Support
 
 ### PEM Format
-
 - Generates `fullchain.pem` (certificate + CA bundle)
 - Optional `ca-bundle.pem` (CA certificates)
 - Optional `private.pem` (private key)
 - Requires CA bundle
 
 ### PFX/PKCS12 Format
-
 - Generates `certificate.pfx`
 - Requires private key
 - Requires password
@@ -164,7 +260,6 @@ foreach ($allFiles->get() as $file) {
 - Optional CA bundle
 
 ### JKS Format
-
 - Generates `certificate.jks`
 - Requires private key
 - Requires password
@@ -204,7 +299,7 @@ composer lint-fix
 All conversion errors throw `ConversionException`:
 
 ```php
-use SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
 
 try {
     $response = $converter->convert($format);
@@ -223,9 +318,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Credits
 
-Developed by [Caique](https://caique.dev)
+Developed by [Caique](https://github.com/caiquemcz)
 
 ## Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/caiquemcz/ssl-converter/issues)
-on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/caiquemcz/ssl-converter/issues) on GitHub.

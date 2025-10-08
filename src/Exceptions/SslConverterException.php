@@ -1,6 +1,6 @@
 <?php
 
-namespace SslConverter\Exceptions;
+namespace CaiqueMcz\SslConverter\Exceptions;
 
 class SslConverterException extends \Exception
 {

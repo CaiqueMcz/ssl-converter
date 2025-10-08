@@ -1,15 +1,15 @@
 <?php
 
-namespace SslConverter\Formats;
+namespace CaiqueMcz\SslConverter\Formats;
 
-use SslConverter\Collections\VirtualFileCollection;
-use SslConverter\Contracts\CertificateFormatInterface;
-use SslConverter\Contracts\ConversionResponseInterface;
-use SslConverter\Exceptions\ConversionException;
-use SslConverter\Utils\NormalizerUtil;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\ConversionResponse;
-use SslConverter\ValueObjects\VirtualFile;
+use CaiqueMcz\SslConverter\Collections\VirtualFileCollection;
+use CaiqueMcz\SslConverter\Contracts\CertificateFormatInterface;
+use CaiqueMcz\SslConverter\Contracts\ConversionResponseInterface;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Utils\NormalizerUtil;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\ConversionResponse;
+use CaiqueMcz\SslConverter\ValueObjects\VirtualFile;
 
 class PemFormat implements CertificateFormatInterface
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace SslConverter\Tests\Unit\ValueObjects;
+namespace CaiqueMcz\SslConverter\Tests\Unit\ValueObjects;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\ValueObjects\VirtualFile;
+use CaiqueMcz\SslConverter\ValueObjects\VirtualFile;
 
 class VirtualFileTest extends TestCase
 {

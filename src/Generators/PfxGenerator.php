@@ -1,11 +1,11 @@
 <?php
 
-namespace SslConverter\Generators;
+namespace CaiqueMcz\SslConverter\Generators;
 
-use SslConverter\Exceptions\ConversionException;
-use SslConverter\Utils\PrivateKeyUtil;
-use SslConverter\Utils\ProcessUtil;
-use SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Utils\PrivateKeyUtil;
+use CaiqueMcz\SslConverter\Utils\ProcessUtil;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
 
 class PfxGenerator
 {

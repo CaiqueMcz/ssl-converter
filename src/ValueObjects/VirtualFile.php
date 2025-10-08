@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SslConverter\ValueObjects;
+namespace CaiqueMcz\SslConverter\ValueObjects;
 
 final class VirtualFile
 {

@@ -1,16 +1,16 @@
 <?php
 
-namespace SslConverter\Tests\Unit;
+namespace CaiqueMcz\SslConverter\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Converter;
-use SslConverter\Contracts\CertificateFormatInterface;
-use SslConverter\Contracts\ConversionResponseInterface;
-use SslConverter\Tests\Fixtures\CertificateFixtures;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
-use SslConverter\Formats\PemFormat;
-use SslConverter\Formats\PfxFormat;
+use CaiqueMcz\SslConverter\Converter;
+use CaiqueMcz\SslConverter\Contracts\CertificateFormatInterface;
+use CaiqueMcz\SslConverter\Contracts\ConversionResponseInterface;
+use CaiqueMcz\SslConverter\Tests\Fixtures\CertificateFixtures;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\Formats\PemFormat;
+use CaiqueMcz\SslConverter\Formats\PfxFormat;
 class ConverterTest extends TestCase
 {
     public function testConvertDelegatesToFormatConvert()

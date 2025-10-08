@@ -1,9 +1,9 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Utils;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Utils\NormalizerUtil;
+use CaiqueMcz\SslConverter\Utils\NormalizerUtil;
 
 class NormalizerUtilTest extends TestCase
 {

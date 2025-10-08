@@ -1,10 +1,10 @@
 <?php
 
-namespace SslConverter\Collections;
+namespace CaiqueMcz\SslConverter\Collections;
 
 use ArrayIterator;
 use IteratorAggregate;
-use SslConverter\ValueObjects\VirtualFile;
+use CaiqueMcz\SslConverter\ValueObjects\VirtualFile;
 
 class VirtualFileCollection implements IteratorAggregate
 {

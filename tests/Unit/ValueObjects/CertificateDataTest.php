@@ -1,10 +1,10 @@
 <?php
 
-namespace SslConverter\Tests\Unit\ValueObjects;
+namespace CaiqueMcz\SslConverter\Tests\Unit\ValueObjects;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class CertificateDataTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace SslConverter\Contracts;
+namespace CaiqueMcz\SslConverter\Contracts;
 
 interface PrivateKeyDataInterface
 {

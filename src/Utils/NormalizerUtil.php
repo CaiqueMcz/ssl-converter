@@ -1,6 +1,6 @@
 <?php
 
-namespace SslConverter\Utils;
+namespace CaiqueMcz\SslConverter\Utils;
 
 class NormalizerUtil
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace SslConverter\ValueObjects;
+namespace CaiqueMcz\SslConverter\ValueObjects;
 
-use SslConverter\Contracts\PrivateKeyDataInterface;
+use CaiqueMcz\SslConverter\Contracts\PrivateKeyDataInterface;
 
 class PrivateKeyData implements PrivateKeyDataInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace SslConverter\Utils;
+namespace CaiqueMcz\SslConverter\Utils;
 
-use SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
 
 class ProcessUtil
 {

@@ -1,13 +1,13 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Generators;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Generators;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Generators\JksGenerator;
-use SslConverter\Tests\Fixtures\CertificateFixtures;
-use SslConverter\Utils\ProcessUtil;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\Generators\JksGenerator;
+use CaiqueMcz\SslConverter\Tests\Fixtures\CertificateFixtures;
+use CaiqueMcz\SslConverter\Utils\ProcessUtil;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class JksGeneratorTest extends TestCase
 {

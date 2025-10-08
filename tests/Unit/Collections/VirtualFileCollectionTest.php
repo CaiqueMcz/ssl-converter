@@ -1,10 +1,10 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Collections;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Collections;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Collections\VirtualFileCollection;
-use SslConverter\ValueObjects\VirtualFile;
+use CaiqueMcz\SslConverter\Collections\VirtualFileCollection;
+use CaiqueMcz\SslConverter\ValueObjects\VirtualFile;
 
 class VirtualFileCollectionTest extends TestCase
 {

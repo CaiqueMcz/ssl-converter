@@ -3,7 +3,7 @@
 namespace Tests\Unit\ValueObjects;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class PrivateKeyDataTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace SslConverter\ValueObjects;
+namespace CaiqueMcz\SslConverter\ValueObjects;
 
-use SslConverter\Contracts\CertificateDataInterface;
-use SslConverter\Contracts\PrivateKeyDataInterface;
-use SslConverter\Utils\NormalizerUtil;
+use CaiqueMcz\SslConverter\Contracts\CertificateDataInterface;
+use CaiqueMcz\SslConverter\Contracts\PrivateKeyDataInterface;
+use CaiqueMcz\SslConverter\Utils\NormalizerUtil;
 
 final class CertificateData implements CertificateDataInterface
 {

@@ -5,12 +5,12 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "SslConverter\\": "src/"
+      "CaiqueMcz\\SslConverter\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SslConverter\\Tests\\": "tests/"
+      "CaiqueMcz\\SslConverter\\Tests\\": "tests/"
     }
   },
   "require": {
@@ -23,6 +23,8 @@
   "minimum-stability": "stable",
   "prefer-stable": true,
   "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-html coverage-html",
     "lint": "phpcs --standard=PSR12 src",
     "lint-fix": "phpcbf --standard=PSR12 src"
   }

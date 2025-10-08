@@ -1,9 +1,9 @@
 <?php
 
-namespace SslConverter\ValueObjects;
+namespace CaiqueMcz\SslConverter\ValueObjects;
 
-use SslConverter\Collections\VirtualFileCollection;
-use SslConverter\Contracts\ConversionResponseInterface;
+use CaiqueMcz\SslConverter\Collections\VirtualFileCollection;
+use CaiqueMcz\SslConverter\Contracts\ConversionResponseInterface;
 
 final class ConversionResponse implements ConversionResponseInterface
 {

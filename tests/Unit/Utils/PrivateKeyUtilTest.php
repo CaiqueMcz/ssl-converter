@@ -1,10 +1,10 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Utils;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Utils\PrivateKeyUtil;
-use SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Utils\PrivateKeyUtil;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
 
 class PrivateKeyUtilTest extends TestCase
 {

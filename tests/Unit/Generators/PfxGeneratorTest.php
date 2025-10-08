@@ -1,13 +1,13 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Generators;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Generators;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Exceptions\ConversionException;
-use SslConverter\Generators\PfxGenerator;
-use SslConverter\Tests\Fixtures\CertificateFixtures;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Generators\PfxGenerator;
+use CaiqueMcz\SslConverter\Tests\Fixtures\CertificateFixtures;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class PfxGeneratorTest extends TestCase
 {

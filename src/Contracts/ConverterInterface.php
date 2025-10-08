@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SslConverter\Contracts;
+namespace CaiqueMcz\SslConverter\Contracts;
 
 interface ConverterInterface
 {

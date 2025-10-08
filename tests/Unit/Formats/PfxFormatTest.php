@@ -1,13 +1,13 @@
 <?php
 
-namespace SslConverter\Tests\Unit\Formats;
+namespace CaiqueMcz\SslConverter\Tests\Unit\Formats;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\Exceptions\ConversionException;
-use SslConverter\Formats\PfxFormat;
-use SslConverter\Tests\Fixtures\CertificateFixtures;
-use SslConverter\ValueObjects\CertificateData;
-use SslConverter\ValueObjects\PrivateKeyData;
+use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Formats\PfxFormat;
+use CaiqueMcz\SslConverter\Tests\Fixtures\CertificateFixtures;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class PfxFormatTest extends TestCase
 {

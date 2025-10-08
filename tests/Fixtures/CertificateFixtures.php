@@ -1,6 +1,6 @@
 <?php
 
-namespace SslConverter\Tests\Fixtures;
+namespace CaiqueMcz\SslConverter\Tests\Fixtures;
 
 class CertificateFixtures
 {

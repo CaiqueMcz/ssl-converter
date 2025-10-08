@@ -1,11 +1,11 @@
 <?php
 
-namespace SslConverter\Tests\Unit\ValueObjects;
+namespace CaiqueMcz\SslConverter\Tests\Unit\ValueObjects;
 
 use PHPUnit\Framework\TestCase;
-use SslConverter\ValueObjects\ConversionResponse;
-use SslConverter\ValueObjects\VirtualFile;
-use SslConverter\Collections\VirtualFileCollection;
+use CaiqueMcz\SslConverter\ValueObjects\ConversionResponse;
+use CaiqueMcz\SslConverter\ValueObjects\VirtualFile;
+use CaiqueMcz\SslConverter\Collections\VirtualFileCollection;
 
 class ConversionResponseTest extends TestCase
 {

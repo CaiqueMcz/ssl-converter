@@ -2,17 +2,29 @@
 
 declare(strict_types=1);
 
-namespace SslConverter;
+namespace CaiqueMcz\SslConverter;
 
-use SslConverter\Contracts\CertificateFormatInterface;
-use SslConverter\Contracts\ConversionResponseInterface;
-use SslConverter\Contracts\ConverterInterface;
+use CaiqueMcz\SslConverter\Contracts\CertificateFormatInterface;
+use CaiqueMcz\SslConverter\Contracts\ConversionResponseInterface;
+use CaiqueMcz\SslConverter\Contracts\ConverterInterface;
+use CaiqueMcz\SslConverter\Formats\PemFormat;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
 class Converter implements ConverterInterface
 {
     public function convert(
         CertificateFormatInterface $to
-    ): ConversionResponseInterface {
+    ): ConversionResponseInterface
+    {
         return $to->convert();
+    }
+
+    public static function convertToPem(string  $certificate, ?string $ca, ?string $privateKey, ?string $privateKeyPassword): ConversionResponseInterface
+    {
+        $privateKeyData = new PrivateKeyData($privateKey, $privateKeyPassword);
+        $certificateData = new CertificateData($certificate, $privateKeyData, $ca);
+        $pemConverter = new PemFormat($certificateData);
+        return (new Converter())->convert($pemConverter);
     }
 }

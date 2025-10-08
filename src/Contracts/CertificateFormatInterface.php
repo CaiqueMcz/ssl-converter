@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace SslConverter\Contracts;
+namespace CaiqueMcz\SslConverter\Contracts;
 
-use SslConverter\ValueObjects\CertificateData;
+use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
 
 interface CertificateFormatInterface
 {
