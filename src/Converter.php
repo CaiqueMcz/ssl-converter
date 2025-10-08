@@ -18,5 +18,4 @@ class Converter implements ConverterInterface
     ): ConversionResponseInterface {
         return $to->convert();
     }
-
 }
