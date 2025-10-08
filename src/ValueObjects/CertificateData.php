@@ -16,11 +16,10 @@ final class CertificateData implements CertificateDataInterface
 
 
     public function __construct(
-        string          $certificate,
+        string $certificate,
         ?PrivateKeyData $privateKeyData = null,
-        ?string         $caBundle = null
-    )
-    {
+        ?string $caBundle = null
+    ) {
         $this->certificate = $certificate;
         $this->privateKeyData = $privateKeyData;
         $this->caBundle = $caBundle;

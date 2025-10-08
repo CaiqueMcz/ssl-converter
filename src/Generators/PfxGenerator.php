@@ -61,7 +61,7 @@ class PfxGenerator
             $this->password,
             [
                 'extracerts' => $caCerts,
-           //     'friendly_name' => 'Certificate'
+            //     'friendly_name' => 'Certificate'
             ]
         );
 
