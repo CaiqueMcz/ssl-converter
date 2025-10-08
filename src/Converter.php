@@ -19,15 +19,4 @@ class Converter implements ConverterInterface
         return $to->convert();
     }
 
-    public static function convertToPem(
-        string $certificate,
-        ?string $ca,
-        ?string $privateKey,
-        ?string $privateKeyPassword
-    ): ConversionResponseInterface {
-        $privateKeyData = new PrivateKeyData($privateKey, $privateKeyPassword);
-        $certificateData = new CertificateData($certificate, $privateKeyData, $ca);
-        $pemConverter = new PemFormat($certificateData);
-        return (new Converter())->convert($pemConverter);
-    }
 }

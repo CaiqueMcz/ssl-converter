@@ -25,6 +25,7 @@ class PemFormat implements CertificateFormatInterface
         $fullChain = new VirtualFile("fullchain.pem", $this->getFullChain());
         $extraFiles = new VirtualFileCollection();
         $extraFiles->add(new VirtualFile("ca-bundle.pem", $this->certificateData->getCaBundle()));
+        $extraFiles->add(new VirtualFile("certificate.pem", $this->certificateData->getCertificate()));
         if ($this->certificateData->hasPrivateKey()) {
             $extraFiles->add(new VirtualFile("private.pem", $this->certificateData->getPrivateKeyData()
                 ->getPrivateKey()));
