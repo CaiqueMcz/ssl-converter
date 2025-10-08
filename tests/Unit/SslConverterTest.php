@@ -66,7 +66,7 @@ class SslConverterTest extends TestCase
 
         $this->assertInstanceOf(ConversionResponseInterface::class, $response);
         $extraFiles = $response->extraVirtualFile()->get();
-        $this->assertCount(1, $extraFiles);
+        $this->assertCount(2, $extraFiles);
     }
 
     public function testToPemWithEncryptedPrivateKey()

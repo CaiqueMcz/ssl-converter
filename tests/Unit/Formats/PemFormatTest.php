@@ -112,7 +112,7 @@ class PemFormatTest extends TestCase
         $response = $format->convert();
 
         $extraFiles = $response->extraVirtualFile()->get();
-        $this->assertCount(2, $extraFiles);
+        $this->assertCount(3, $extraFiles);
 
         $caBundleFile = $extraFiles[0];
         $this->assertEquals('ca-bundle.pem', $caBundleFile->getName());
@@ -132,9 +132,9 @@ class PemFormatTest extends TestCase
         $response = $format->convert();
 
         $extraFiles = $response->extraVirtualFile()->get();
-        $this->assertCount(2, $extraFiles);
+        $this->assertCount(3, $extraFiles);
 
-        $privateKeyFile = $extraFiles[1];
+        $privateKeyFile = $extraFiles[2];
         $this->assertEquals('private.pem', $privateKeyFile->getName());
         $this->assertStringContainsString('BEGIN', $privateKeyFile->getContent());
     }
@@ -152,7 +152,7 @@ class PemFormatTest extends TestCase
         $response = $format->convert();
 
         $extraFiles = $response->extraVirtualFile()->get();
-        $this->assertCount(1, $extraFiles);
+        $this->assertCount(2, $extraFiles);
         $this->assertEquals('ca-bundle.pem', $extraFiles[0]->getName());
     }
 
@@ -169,12 +169,12 @@ class PemFormatTest extends TestCase
         $response = $format->convert();
 
         $allFiles = $response->getAllVirtualFiles()->get();
-        $this->assertCount(3, $allFiles);
+        $this->assertCount(4, $allFiles);
 
         $fileNames = array_map(function ($file) {
             return $file->getName();
         }, $allFiles);
 
-        $this->assertEquals(['fullchain.pem', 'ca-bundle.pem', 'private.pem'], $fileNames);
+        $this->assertEquals(['fullchain.pem', 'ca-bundle.pem','certificate.pem', 'private.pem'], $fileNames);
     }
 }
