@@ -3,6 +3,7 @@
 namespace CaiqueMcz\SslConverter\Generators;
 
 use CaiqueMcz\SslConverter\Exceptions\ConversionException;
+use CaiqueMcz\SslConverter\Utils\NormalizerUtil;
 use CaiqueMcz\SslConverter\Utils\PrivateKeyUtil;
 use CaiqueMcz\SslConverter\Utils\ProcessUtil;
 use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
@@ -49,7 +50,7 @@ class PfxGenerator
 
         $caCerts = null;
         if ($caBundle) {
-            $caCerts = [$caBundle];
+            $caCerts = NormalizerUtil::splitCertificates($caBundle);
         }
 
         $pfxData = '';

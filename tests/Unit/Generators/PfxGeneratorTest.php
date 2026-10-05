@@ -41,6 +41,10 @@ class PfxGeneratorTest extends TestCase
 
         $this->assertNotEmpty($pfxData);
         $this->assertIsString($pfxData);
+
+        $certs = [];
+        $this->assertTrue(openssl_pkcs12_read($pfxData, $certs, 'test123'));
+        $this->assertEmpty($certs['extracerts'] ?? []);
     }
 
     public function testGenerateWithEncryptedPrivateKey()
@@ -265,10 +269,44 @@ class PfxGeneratorTest extends TestCase
         $pfxData = $generator->generate();
 
         $certs = [];
-        openssl_pkcs12_read($pfxData, $certs, $password);
+        $this->assertTrue(openssl_pkcs12_read($pfxData, $certs, $password));
 
         $this->assertArrayHasKey('extracerts', $certs);
         $this->assertIsArray($certs['extracerts']);
-        $this->assertNotEmpty($certs['extracerts']);
+        $this->assertCount(1, $certs['extracerts']);
+        $this->assertSame(
+            openssl_x509_fingerprint($data['ca_bundle'], 'sha256'),
+            openssl_x509_fingerprint($certs['extracerts'][0], 'sha256')
+        );
+    }
+
+    public function testGeneratedPfxContainsAllCaBundleCertificates(): void
+    {
+        $data = CertificateFixtures::generateCompleteCertificateData(true, false, false);
+        $caCertificates = [
+            CertificateFixtures::generateCaBundle(),
+            CertificateFixtures::generateCaBundle(),
+        ];
+        $certificateData = new CertificateData(
+            $data['certificate'],
+            new PrivateKeyData($data['private_key']),
+            implode("\n", $caCertificates)
+        );
+
+        $generator = new PfxGenerator($certificateData, 'test123');
+        $pfxData = $generator->generate();
+
+        $certs = [];
+        $this->assertTrue(openssl_pkcs12_read($pfxData, $certs, 'test123'));
+        $this->assertArrayHasKey('extracerts', $certs);
+        $this->assertCount(count($caCertificates), $certs['extracerts']);
+
+        $fingerprint = static function (string $certificate): string {
+            return openssl_x509_fingerprint($certificate, 'sha256');
+        };
+        $this->assertEqualsCanonicalizing(
+            array_map($fingerprint, $caCertificates),
+            array_map($fingerprint, $certs['extracerts'])
+        );
     }
 }
