@@ -249,6 +249,79 @@ class ZipExportTest extends TestCase
         return ['unencrypted ZIP' => [false], 'encrypted ZIP' => [true]];
     }
 
+    /** @dataProvider certificateOnlyModes */
+    public function testWithoutPrivateKeyExportsOnlyCertificateDirectories(bool $encryptZip, bool $legacy): void
+    {
+        if (!class_exists(ZipArchive::class)) {
+            $this->markTestSkipped('ext-zip is not available');
+        }
+        $data = $this->certificateChain('example.com');
+        $data['private_key'] = null;
+        $previousPath = getenv('PATH');
+        putenv('PATH=/nonexistent-ssl-converter-test');
+        try {
+            $path = $this->export($data, null, 'shared-password', $encryptZip, $legacy);
+        } finally {
+            putenv($previousPath === false ? 'PATH' : 'PATH=' . $previousPath);
+        }
+        self::assertMatchesRegularExpression('/^example\.com_[0-9]{12}\.zip$/', basename($path));
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($path));
+        try {
+            $expected = [
+                'crt/certificate.crt', 'crt/ca-bundle.crt',
+                'pem/certificate.pem', 'pem/ca-bundle.pem', 'pem/fullchain.pem',
+            ];
+            $names = [];
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $names[] = $zip->getNameIndex($index);
+                if ($encryptZip) {
+                    self::assertFalse($zip->getFromIndex($index));
+                }
+            }
+            self::assertEqualsCanonicalizing($expected, $names);
+            if ($encryptZip) {
+                self::assertTrue($zip->setPassword('shared-password'));
+            }
+            foreach (['crt/certificate.crt', 'pem/certificate.pem'] as $name) {
+                self::assertSame($data['certificate'], $zip->getFromName($name));
+            }
+            foreach (['crt/ca-bundle.crt', 'pem/ca-bundle.pem'] as $name) {
+                self::assertSame($data['ca_bundle'], $zip->getFromName($name));
+            }
+            $fullchain = NormalizerUtil::splitCertificates($zip->getFromName('pem/fullchain.pem'));
+            self::assertSame(
+                NormalizerUtil::splitCertificates($data['certificate'] . $data['ca_bundle']),
+                $fullchain
+            );
+        } finally {
+            $zip->close();
+        }
+    }
+
+    public function certificateOnlyModes(): array
+    {
+        return [[false, false], [true, false], [false, true], [true, true]];
+    }
+
+    public function testWithoutPrivateKeyDoesNotRequireAValidJksAlias(): void
+    {
+        if (!class_exists(ZipArchive::class)) {
+            $this->markTestSkipped('ext-zip is not available');
+        }
+        $data = $this->certificateChain('---');
+        $data['private_key'] = null;
+        $path = $this->export($data);
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($path));
+        try {
+            self::assertSame(5, $zip->numFiles);
+            self::assertSame($data['certificate'], $zip->getFromName('crt/certificate.crt'));
+        } finally {
+            $zip->close();
+        }
+    }
+
     public function testKeytoolFailureDoesNotLeakSecretsOrLeaveTemporaryFiles(): void
     {
         if (!class_exists(ZipArchive::class)) {
@@ -357,13 +430,17 @@ PHP;
     }
 
     /** @dataProvider invalidInputs */
-    public function testInvalidInputFailsWithoutLeavingTemporaryFiles(string $case): void
+    public function testInvalidInputFailsWithoutLeavingTemporaryFiles(string $case, bool $withPrivateKey = true): void
     {
         $data = $this->certificateChain($case === 'missing-cn' ? null : 'example.com');
+        if (!$withPrivateKey) {
+            $data['private_key'] = null;
+        }
         $password = 'shared-password';
         $keyPassword = null;
         switch ($case) {
-            case 'missing-key': $data['private_key'] = null; break;
+            case 'invalid-key': $data['private_key'] = 'invalid-private-key'; break;
+            case 'empty-key': $data['private_key'] = ''; break;
             case 'missing-bundle': $data['ca_bundle'] = null; break;
             case 'invalid-certificate': $data['certificate'] = 'invalid'; break;
             case 'invalid-bundle': $data['ca_bundle'] = 'invalid'; break;
@@ -391,12 +468,20 @@ PHP;
 
     public function invalidInputs(): array
     {
-        return array_map(static function (string $case): array {
-            return [$case];
-        }, [
-            'missing-key', 'missing-bundle', 'missing-cn', 'invalid-certificate', 'invalid-bundle',
+        $inputs = [];
+        foreach ([
+            'invalid-key', 'empty-key', 'missing-bundle', 'missing-cn', 'invalid-certificate', 'invalid-bundle',
             'truncated-bundle', 'mismatched-key', 'wrong-key-password', 'empty-password', 'short-password',
-        ]);
+        ] as $case) {
+            $inputs[$case] = [$case, true];
+        }
+        foreach ([
+            'missing-bundle', 'missing-cn', 'invalid-certificate', 'invalid-bundle',
+            'truncated-bundle', 'empty-password', 'short-password',
+        ] as $case) {
+            $inputs[$case . ' without key'] = [$case, false];
+        }
+        return $inputs;
     }
 
     private function export(

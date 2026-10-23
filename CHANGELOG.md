@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased
+## 3.1.0 - 2026-10-23
 
+- Export ZIPs without a private key using only `crt` and `pem`, retaining certificate and
+  CA bundle files and omitting private keys, keystores, aliases and password files.
+  This path supports optional ZIP encryption and needs no external conversion tools.
+  Supplied private keys remain subject to parsing, password and certificate-match checks.
 - Resolve development dependencies against PHP 7.4.0 so PHPUnit uses compatible
   Doctrine Instantiator and DeepCopy versions when dependencies are installed on a newer PHP.
   This fixes mock creation errors caused by `enum_exists()` on PHP 7.4 and 8.0.
