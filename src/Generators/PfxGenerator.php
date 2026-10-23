@@ -88,7 +88,7 @@ class PfxGenerator
                 '-nodes',
                 '-password', 'pass:' . $this->password
             ]);
-            $extractProcess->mustRun();
+            $this->runLegacyProcess($extractProcess);
 
             $convertProcess = new ProcessUtil([
                 'openssl', 'pkcs12',
@@ -99,7 +99,7 @@ class PfxGenerator
                 '-password', 'pass:' . $this->password,
                 '-passout', 'pass:' . $this->password
             ]);
-            $convertProcess->mustRun();
+            $this->runLegacyProcess($convertProcess);
 
             $legacyData = file_get_contents($tempLegacy);
 
@@ -116,6 +116,21 @@ class PfxGenerator
             if (file_exists($tempLegacy)) {
                 unlink($tempLegacy);
             }
+        }
+    }
+
+    private function runLegacyProcess(ProcessUtil $process): void
+    {
+        set_error_handler(static function (): void {
+            throw new ConversionException('Unable to execute OpenSSL for legacy PKCS#12 conversion.');
+        }, E_WARNING);
+        try {
+            $process->run();
+        } finally {
+            restore_error_handler();
+        }
+        if (!$process->isSuccessful()) {
+            throw new ConversionException('OpenSSL failed during legacy PKCS#12 conversion.');
         }
     }
 }

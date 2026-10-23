@@ -178,9 +178,21 @@ class SslConverterTest extends TestCase
         $response = (new SslConverter($data['certificate']))
             ->withCaBundle($data['ca_bundle'])
             ->withPrivateKey($data['private_key'])
-            ->toJks('jks-password', 'mykey');
+            ->toJks('jks-password', 'My-KEY_!');
 
         $this->assertInstanceOf(ConversionResponseInterface::class, $response);
+        $path = tempnam(sys_get_temp_dir(), 'test_jks_');
+        try {
+            file_put_contents($path, $response->virtualFile()->getContent());
+            $process = new ProcessUtil([
+                'keytool', '-list', '-keystore', $path, '-storetype', 'jks',
+                '-storepass', 'jks-password', '-alias', 'mykey'
+            ]);
+            $process->run();
+            $this->assertTrue($process->isSuccessful(), 'The custom alias must exist in the JKS.');
+        } finally {
+            unlink($path);
+        }
     }
 
     public function testToJksWithLegacyAlgorithm()

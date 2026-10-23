@@ -16,6 +16,7 @@ class JksFormat implements CertificateFormatInterface
     private CertificateData $certificateData;
     private ?string $jksPassword = null;
     private bool $useLegacyAlgorithm = false;
+    private string $alias = 'cert';
 
     public function __construct(CertificateData $certificateData)
     {
@@ -25,6 +26,12 @@ class JksFormat implements CertificateFormatInterface
     public function setJksPassword(string $password): self
     {
         $this->jksPassword = $password;
+        return $this;
+    }
+
+    public function setAlias(string $alias): self
+    {
+        $this->alias = $alias;
         return $this;
     }
 
@@ -77,7 +84,7 @@ class JksFormat implements CertificateFormatInterface
      */
     private function generateJks(): string
     {
-        return (new JksGenerator($this->certificateData, $this->jksPassword, 'cert', $this->useLegacyAlgorithm))
+        return (new JksGenerator($this->certificateData, $this->jksPassword, $this->alias, $this->useLegacyAlgorithm))
             ->generate();
     }
 }
