@@ -16,6 +16,9 @@
   "require": {
     "php": ">=7.4"
   },
+  "suggest": {
+    "ext-zip": "Required to export all formats as a ZIP archive."
+  },
   "require-dev": {
     "phpunit/phpunit": "^9.6",
     "squizlabs/php_codesniffer": "^4.0"

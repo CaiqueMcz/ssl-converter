@@ -6,6 +6,7 @@ use CaiqueMcz\SslConverter\Contracts\ConversionResponseInterface;
 use CaiqueMcz\SslConverter\Formats\JksFormat;
 use CaiqueMcz\SslConverter\Formats\PemFormat;
 use CaiqueMcz\SslConverter\Formats\PfxFormat;
+use CaiqueMcz\SslConverter\Generators\ZipGenerator;
 use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
 use CaiqueMcz\SslConverter\ValueObjects\PrivateKeyData;
 
@@ -64,12 +65,36 @@ class SslConverter
 
         $format = new JksFormat($certificateData);
         $format->setJksPassword($password);
+        $format->setAlias($alias);
 
         if ($useLegacyAlgorithm) {
             $format->withLegacyAlgorithm();
         }
 
         return (new Converter())->convert($format);
+    }
+
+    /**
+     * Export CRT, PEM, PFX/P12 and JKS using one password and return the temporary ZIP path.
+     * The ZIP filename is the sanitized CN plus random digits; format folders are at the archive root.
+     * The archive includes the output password in password.txt beside each keystore.
+     * Set $encryptZip to also encrypt ZIP entries with the same password (AES-256).
+     * Set $useLegacyAlgorithm to generate the PFX/P12 files using OpenSSL legacy mode.
+     * The caller must delete the ZIP and its containing temporary directory after use.
+     *
+     * @throws \CaiqueMcz\SslConverter\Exceptions\ConversionException
+     */
+    public function toZip(
+        string $password,
+        bool $encryptZip = false,
+        bool $useLegacyAlgorithm = false
+    ): string {
+        return (new ZipGenerator(
+            $this->buildCertificateData(),
+            $password,
+            $encryptZip,
+            $useLegacyAlgorithm
+        ))->generate();
     }
 
     private function buildCertificateData(): CertificateData

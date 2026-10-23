@@ -4,6 +4,7 @@ namespace CaiqueMcz\SslConverter\Generators;
 
 use CaiqueMcz\SslConverter\Exceptions\ConversionException;
 use CaiqueMcz\SslConverter\Utils\ProcessUtil;
+use CaiqueMcz\SslConverter\Utils\JksAlias;
 use CaiqueMcz\SslConverter\ValueObjects\CertificateData;
 
 class JksGenerator
@@ -21,16 +22,18 @@ class JksGenerator
     ) {
         $this->certificateData = $certificateData;
         $this->password = $password;
-        $this->alias = $alias;
+        $this->alias = JksAlias::normalize($alias);
         $this->useLegacyAlgorithm = $useLegacyAlgorithm;
     }
 
     public function generate()
     {
-        $tempPfx = tempnam(sys_get_temp_dir(), 'pfx_');
-        $tempJks = tempnam(sys_get_temp_dir(), 'jks_');
-
-        unlink($tempJks);
+        $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'jks_' . bin2hex(random_bytes(16));
+        if (!mkdir($directory, 0700)) {
+            throw new ConversionException('Unable to create a private temporary directory for JKS.');
+        }
+        $tempPfx = $directory . DIRECTORY_SEPARATOR . 'input.pfx';
+        $tempJks = $directory . DIRECTORY_SEPARATOR . 'output.jks';
 
         try {
             $pfxGenerator = new PfxGenerator(
@@ -39,7 +42,9 @@ class JksGenerator
                 $this->useLegacyAlgorithm
             );
             $pfxData = $pfxGenerator->generate();
-            file_put_contents($tempPfx, $pfxData);
+            if (file_put_contents($tempPfx, $pfxData) !== strlen($pfxData)) {
+                throw new ConversionException('Unable to write the temporary PFX file.');
+            }
 
             $process = new ProcessUtil([
                 'keytool',
@@ -55,9 +60,23 @@ class JksGenerator
                 '-noprompt'
             ]);
 
-            $process->mustRun();
+            set_error_handler(static function (): void {
+                throw new ConversionException('Unable to execute keytool.');
+            }, E_WARNING);
+            try {
+                $process->run();
+            } finally {
+                restore_error_handler();
+            }
+            if (!$process->isSuccessful()) {
+                throw new ConversionException('keytool could not import the certificate into JKS.');
+            }
 
-            return file_get_contents($tempJks);
+            $content = file_get_contents($tempJks);
+            if ($content === false) {
+                throw new ConversionException('Unable to read the generated JKS file.');
+            }
+            return $content;
         } catch (ConversionException $e) {
             throw new ConversionException("Failed to generate JKS file: " . $e->getMessage());
         } finally {
@@ -67,6 +86,7 @@ class JksGenerator
             if (file_exists($tempJks)) {
                 unlink($tempJks);
             }
+            rmdir($directory);
         }
     }
 }

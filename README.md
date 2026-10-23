@@ -10,6 +10,7 @@ A PHP library for converting SSL certificates between different formats (PEM, PF
 - Convert certificates to PEM format with full chain
 - Convert certificates to PFX/PKCS12 format
 - Convert certificates to JKS (Java KeyStore) format
+- Export CRT, PEM, PFX, P12 and JKS in a temporary ZIP named after the certificate common name
 - Support for encrypted private keys
 - CA bundle handling
 - Legacy algorithm support for older systems
@@ -22,6 +23,7 @@ A PHP library for converting SSL certificates between different formats (PEM, PF
 - OpenSSL extension
 - Symfony Process component
 - Java keytool (for JKS conversion)
+- ZIP extension (`ext-zip`, for ZIP export only)
 
 ## Installation
 
@@ -62,6 +64,105 @@ file_put_contents(
     $response->virtualFile()->getContent()
 );
 ```
+
+### Export All Formats as a ZIP
+
+```php
+use CaiqueMcz\SslConverter\SslConverter;
+
+$converter = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)
+    ->withPrivateKey($privateKey, $inputKeyPassword); // optional input key password
+
+$zipPath = $converter->toZip('SharedPassword123!');
+
+// To also encrypt every ZIP entry with that same password:
+// $zipPath = $converter->toZip('SharedPassword123!', true);
+
+// To generate legacy PFX/P12 files (the second argument still controls ZIP encryption):
+// $zipPath = $converter->toZip('SharedPassword123!', false, true);
+// $zipPath = $converter->toZip('SharedPassword123!', true, true); // also encrypt the ZIP
+
+try {
+    // Send or copy the archive using $zipPath.
+} finally {
+    unlink($zipPath);
+    rmdir(dirname($zipPath));
+}
+```
+
+For a certificate with CN `example.com`, the filename is `example.com_<12 random digits>.zip`.
+The format directories sit directly at the root of the archive:
+
+```text
+crt/
+  ca-bundle.crt
+  certificate.crt
+  private.key
+jks/
+  alias.txt
+  certificate.jks
+  password.txt
+p12/
+  certificate.p12
+  password.txt
+pem/
+  ca-bundle.pem
+  certificate.pem
+  fullchain.pem
+  private.pem
+pfx/
+  certificate.pfx
+  password.txt
+```
+
+`toZip(string $password, bool $encryptZip = false, bool $useLegacyAlgorithm = false): string`
+requires a parseable certificate with a single nonempty CN,
+a matching private key, a CA bundle, `ext-zip`, and Java `keytool`. It returns an absolute
+path such as `/tmp/ssl_converter_<random>/example.com_123456789012.zip`, under `sys_get_temp_dir()`.
+Each filename uses a fresh cryptographically random 12-digit suffix; repeated calls create
+separate archives. The caller must delete the ZIP and its containing temporary directory
+when finished. On POSIX systems, the directory has mode `0700` and the
+completed ZIP has mode `0600`. Conversion failures remove partially generated files.
+
+PFX and P12 contain the same encrypted PKCS#12 data under their respective filenames.
+The `crt` directory reuses the PEM-encoded certificate and CA bundle with `.crt` filenames;
+`private.key` contains the same encrypted PEM private key as `pem/private.pem`.
+The JKS directory includes `alias.txt` with the normalized alias actually used by the keystore.
+Each JKS, P12 and PFX directory includes `password.txt` containing the shared output password.
+These text files contain the exact values, without an appended newline.
+
+The same password protects PFX/P12, the JKS keystore and key entry, and the encrypted PEM private
+key (AES-256-CBC). It must have at least six characters, as required by `keytool`. An encrypted
+input key can have a different password, supplied through `withPrivateKey()`; the exported
+PEM key is encrypted with the shared output password. By default, the ZIP container has no password.
+In that mode, the included `password.txt` files expose the password needed to open the private keys.
+Pass `true` as the second argument to encrypt every entry with AES-256 using the shared password.
+This requires `ext-zip` built with libzip >= 1.2.0 and an extractor that supports AES-encrypted ZIPs;
+if encryption is unavailable or fails, export fails without returning an unprotected archive.
+Entry filenames remain visible even when encryption is enabled. See the
+[PHP ZIP encryption documentation](https://www.php.net/manual/en/ziparchive.setencryptionname.php).
+No plaintext private key is included in the ZIP.
+
+The third argument, `$useLegacyAlgorithm`, controls legacy generation of both PFX and P12.
+It defaults to `false`. Set it to `true` only for systems requiring older PKCS#12 encryption
+algorithms. This option uses the existing OpenSSL CLI `pkcs12 -export -legacy` conversion
+and requires OpenSSL 3 with its legacy provider available. These older algorithms provide
+weaker protection; see the [OpenSSL PKCS#12 documentation](https://docs.openssl.org/3.0/man1/openssl-pkcs12/).
+ZIP encryption is configured separately with the second argument. Legacy conversion stages
+an unencrypted PEM private key in a random temporary file with owner-only permissions on
+POSIX systems, then removes the staging files on success or failure.
+
+The ZIP filename prefix preserves the CN's ASCII letters, digits, dots, underscores and hyphens;
+other characters (including a wildcard `*`) become underscores. Leading/trailing dots are
+removed, and Windows device names are prefixed with an underscore. For example,
+`*.example.com` becomes `_.example.com_<12 random digits>.zip`. There is no enclosing CN directory
+inside the ZIP. The JKS alias is derived from the original CN
+using the alias policy below. PEM retains CA bundle order; PKCS#12 tools can reorder extra
+certificates, and `keytool` constructs the JKS certificate chain from linked certificates.
+
+These rules apply to ZIP export. Existing individual format methods retain their password
+and PEM key handling behavior.
 
 ### Real-World Examples
 
@@ -254,6 +355,7 @@ foreach ($allFiles->get() as $file) {
 
 ### PFX/PKCS12 Format
 - Generates `certificate.pfx`
+- ZIP export also includes the same PKCS#12 container as `p12/certificate.p12`
 - Requires private key
 - Requires password
 - Supports legacy algorithm for compatibility
@@ -267,6 +369,13 @@ foreach ($allFiles->get() as $file) {
 - Supports legacy algorithm
 - Optional CA bundle
 - Custom alias support
+
+JKS aliases, including custom aliases passed to `toJks()`, are normalized to lowercase ASCII
+letters and digits (`a-z`, `0-9`), with other characters removed, and truncated to 32 characters.
+For example, `*.Example.COM` becomes `examplecom`. An alias with no remaining letters or
+digits raises `ConversionException`. This is the library's interoperability policy, rather
+than a Java-wide 32-character restriction. Use the normalized alias when accessing the entry
+with `keytool`. Direct `JksFormat` callers can configure it with `setAlias()`.
 
 ## Architecture
 
