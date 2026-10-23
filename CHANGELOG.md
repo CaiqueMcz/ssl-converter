@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Resolve development dependencies against PHP 7.4.0 so PHPUnit uses compatible
+  Doctrine Instantiator and DeepCopy versions when dependencies are installed on a newer PHP.
+  This fixes mock creation errors caused by `enum_exists()` on PHP 7.4 and 8.0.
+- Check real runtime platform requirements in CI after installing dependencies.
+
 ## 3.0.0 - 2026-10-23
 
 - Add `SslConverter::toZip(string $password, bool $encryptZip = false, bool $useLegacyAlgorithm = false): string`

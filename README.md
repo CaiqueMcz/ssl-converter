@@ -389,6 +389,20 @@ The library follows SOLID principles with a clean architecture:
 
 ## Testing
 
+Development dependency resolution targets PHP 7.4.0 through Composer's `config.platform.php`,
+matching the library's minimum supported PHP version. This allows the same development
+dependencies to be tested on PHP 7.4 and newer. Run `composer check-platform-reqs` to check
+the actual interpreter and extensions; that command does not use the simulated platform.
+See [Composer's platform configuration](https://getcomposer.org/doc/06-config.md#platform).
+
+If an existing local installation selected PHPUnit helper dependencies requiring a newer PHP,
+refresh them before running the suite on PHP 7.4 or 8.0:
+
+```bash
+composer update doctrine/instantiator myclabs/deep-copy --with-dependencies
+composer check-platform-reqs
+```
+
 ```bash
 # Run tests
 composer test
