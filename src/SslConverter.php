@@ -76,8 +76,9 @@ class SslConverter
 
     /**
      * Export CRT, PEM, PFX/P12 and JKS using one password and return the temporary ZIP path.
+     * Without a private key, export only CRT/PEM certificate files and the CA bundle.
      * The ZIP filename is the sanitized CN plus random digits; format folders are at the archive root.
-     * The archive includes the output password in password.txt beside each keystore.
+     * With a private key, the archive includes the output password in password.txt beside each keystore.
      * Set $encryptZip to also encrypt ZIP entries with the same password (AES-256).
      * Set $useLegacyAlgorithm to generate the PFX/P12 files using OpenSSL legacy mode.
      * The caller must delete the ZIP and its containing temporary directory after use.

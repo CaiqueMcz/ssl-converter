@@ -56,13 +56,16 @@ final class ZipGenerator
         }
         $commonName = $this->commonName();
         $archiveName = $this->archiveName($commonName);
-        $alias = JksAlias::normalize($commonName);
-        $data = $this->encryptedCertificateData();
-        $formats = [
-            new PemFormat($data),
-            (new PfxFormat($data))->setPfxPassword($this->password)->setUseLegacyAlgorithm($this->useLegacyAlgorithm),
-            (new JksFormat($data))->setJksPassword($this->password)->setAlias($alias),
-        ];
+        $data = $this->prepareCertificateData();
+        $formats = [new PemFormat($data)];
+        $alias = null;
+        if ($data->hasPrivateKey()) {
+            $alias = JksAlias::normalize($commonName);
+            $formats[] = (new PfxFormat($data))
+                ->setPfxPassword($this->password)
+                ->setUseLegacyAlgorithm($this->useLegacyAlgorithm);
+            $formats[] = (new JksFormat($data))->setJksPassword($this->password)->setAlias($alias);
+        }
 
         // A private directory also protects libzip's temporary replacement files.
         $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ssl_converter_' . bin2hex(random_bytes(16));
@@ -90,7 +93,9 @@ final class ZipGenerator
                 }
             }
             $this->addCrtFiles($zip, $data);
-            $this->addKeystoreMetadata($zip, $alias);
+            if ($alias !== null) {
+                $this->addKeystoreMetadata($zip, $alias);
+            }
             $closed = $zip->close();
             $opened = false;
             if (!$closed || !chmod($path, 0600)) {
@@ -118,7 +123,9 @@ final class ZipGenerator
     {
         $this->addFile($zip, 'crt/ca-bundle.crt', $data->getCaBundle());
         $this->addFile($zip, 'crt/certificate.crt', $data->getCertificate());
-        $this->addFile($zip, 'crt/private.key', $data->getPrivateKeyData()->getPrivateKey());
+        if ($data->hasPrivateKey()) {
+            $this->addFile($zip, 'crt/private.key', $data->getPrivateKeyData()->getPrivateKey());
+        }
     }
 
     private function addKeystoreMetadata(ZipArchive $zip, string $alias): void
@@ -168,11 +175,8 @@ final class ZipGenerator
         return $baseName . '_' . $sequence . '.zip';
     }
 
-    private function encryptedCertificateData(): CertificateData
+    private function prepareCertificateData(): CertificateData
     {
-        if (!$this->certificateData->hasPrivateKey()) {
-            throw new ConversionException('Private key is required for ZIP export.');
-        }
         $bundle = $this->certificateData->getCaBundle();
         if ($bundle === null) {
             throw new ConversionException('CA bundle is required for ZIP export.');
@@ -192,6 +196,9 @@ final class ZipGenerator
             if ($parsed === false) {
                 throw new ConversionException('Invalid certificate in CA bundle.');
             }
+        }
+        if (!$this->certificateData->hasPrivateKey()) {
+            return $this->certificateData;
         }
         $keyData = $this->certificateData->getPrivateKeyData();
         $key = $this->readOpenSsl(static function () use ($keyData) {

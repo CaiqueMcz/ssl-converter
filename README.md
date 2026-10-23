@@ -92,7 +92,7 @@ try {
 ```
 
 For a certificate with CN `example.com`, the filename is `example.com_<12 random digits>.zip`.
-The format directories sit directly at the root of the archive:
+When a private key is supplied, the format directories sit directly at the root of the archive:
 
 ```text
 crt/
@@ -116,9 +116,35 @@ pfx/
   password.txt
 ```
 
+Without a private key, omit `withPrivateKey()`:
+
+```php
+$zipPath = (new SslConverter($certificate))
+    ->withCaBundle($caBundle)
+    ->toZip('SharedPassword123!');
+```
+
+The archive then contains only the certificate files and CA bundle in `crt` and `pem`:
+
+```text
+crt/
+  ca-bundle.crt
+  certificate.crt
+pem/
+  ca-bundle.pem
+  certificate.pem
+  fullchain.pem
+```
+
+This export requires no `keytool` or OpenSSL CLI. ZIP encryption remains optional through
+the second argument, and the legacy flag has no effect because no PKCS#12 files are generated.
+The CA bundle, certificate CN and existing password requirements still apply. A supplied
+private key must be valid and match the certificate; invalid key material raises an error.
+
 `toZip(string $password, bool $encryptZip = false, bool $useLegacyAlgorithm = false): string`
-requires a parseable certificate with a single nonempty CN,
-a matching private key, a CA bundle, `ext-zip`, and Java `keytool`. It returns an absolute
+requires a parseable certificate with a single nonempty CN, a CA bundle and `ext-zip`.
+Supplying a matching private key also enables PFX, P12 and JKS; JKS requires Java `keytool`.
+It returns an absolute
 path such as `/tmp/ssl_converter_<random>/example.com_123456789012.zip`, under `sys_get_temp_dir()`.
 Each filename uses a fresh cryptographically random 12-digit suffix; repeated calls create
 separate archives. The caller must delete the ZIP and its containing temporary directory
